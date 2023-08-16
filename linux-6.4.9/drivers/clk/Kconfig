@@ -463,6 +463,13 @@ config COMMON_CLK_SP7021
 	  It implements SP7021 PLLs/gate.
 	  Not all features of the PLL are currently supported
 	  by the driver.
+	  
+config COMMON_CLK_AU5508
+	tristate "Clock driver for aurasemi au5508"
+	depends on SPI
+	select REGMAP_SPI
+	help
+	  This driver supports aurasemi au5508 clock generators.
 
 source "drivers/clk/actions/Kconfig"
 source "drivers/clk/analogbits/Kconfig"

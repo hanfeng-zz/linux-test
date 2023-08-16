@@ -19,7 +19,12 @@
 		stdout-path = &uart0;
 	};
 
-
+    ocelot_clock: ocelot-clock {
+          compatible = "fixed-clock";
+          #clock-cells = <0>;
+          clock-frequency = <125000000>;
+      };
+	  
 	vmmcsd_fixed: fixedregulator0 {
 		compatible = "regulator-fixed";
 		regulator-name = "vmmcsd_fixed";
@@ -34,34 +39,12 @@
 		echo-gpios = <&gpio2 10 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
-    ethernet-switch@1 {
+	
+#if 0
+    ethernet-switch@800000 {
             compatible = "mscc,vsc7512-switch";
-			reg = 	<0x71010000 0x10000>,
-					<0x71030000 0x10000>,
-					<0x71080000 0x100>,
-					<0x710e0000 0x10000>,
-					<0x711e0000 0x100>,
-					<0x711f0000 0x100>,
-					<0x71200000 0x100>,
-					<0x71210000 0x100>,
-					<0x71220000 0x100>,
-					<0x71230000 0x100>,
-					<0x71240000 0x100>,
-					<0x71250000 0x100>,
-					<0x71260000 0x100>,
-					<0x71270000 0x100>,
-					<0x71280000 0x100>,
-					<0x71800000 0x80000>,
-					<0x71880000 0x10000>,
-					<0x71040000 0x10000>,
-					<0x71050000 0x10000>,
-					<0x71060000 0x10000>;
-			
-			reg-names = "sys", "rew", "qs", "ptp", "port0", "port1",
-            "port2", "port3", "port4", "port5", "port6",
-            "port7", "port8", "port9", "port10", "qsys",
-            "ana", "s0", "s1", "s2";
-
+            reg = <0x800000 0x290000>;
+            little-endian;
             #address-cells = <1>;
             #size-cells = <0>;
 				
@@ -105,34 +88,55 @@
 						reg = <0x3>;
 						label = "swp3";
 						phy-mode = "internal";
-						
+						fixed-link {
+							speed = <1000>;
+							full-duplex;
+							pause;
+						};
 					};
 
 					port@4 {
 						reg = <0x4>;
 						label = "swp4";
 						phy-mode = "internal";
+						fixed-link {
+							speed = <1000>;
+							full-duplex;
+							pause;
+						};
 					};
 
 					port@5 {
 						reg = <0x5>;
 						label = "swp5";
 						phy-mode = "internal";
-						
+						fixed-link {
+							speed = <1000>;
+							full-duplex;
+							pause;
+						};
 					};
 
 					port@6 {
 						reg = <0x6>;
 						label = "swp6";
 						phy-mode = "internal";
-					
+						fixed-link {
+							speed = <1000>;
+							full-duplex;
+							pause;
+						};
 					};
 
 					port@7 {
 						reg = <0x7>;
 						label = "swp7";
 						phy-mode = "internal";
-						
+						fixed-link {
+							speed = <1000>;
+							full-duplex;
+							pause;
+						};
 					};
 
 					port@8 {
@@ -159,6 +163,32 @@
 
 			};
     };
+#endif
+#if 0
+	ethernet-switch@0 {
+		compatible = "mscc,vsc7512-switch";
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				label = "cpu";
+				status = "okay";
+				ethernet = <&mac_sw>;
+				phy-handle = <&sw_phy0>;
+				phy-mode = "internal";
+			};
+		port@1 {
+				reg = <1>;
+				label = "swp1";
+				status = "okay";
+				//phy-handle = <&sw_phy1>;
+				phy-mode = "internal";
+				};
+
+		};
+	};
+#endif
 
 
 };
@@ -424,9 +454,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&spi0_pins>;
     spidev@0 {
-	     compatible = "rohm,dh2228fv";
+	     compatible = "aurasemi,au55xx";
          spi-max-frequency = <20000000>;
          reg = <0>;
+		reset-gpios = <&gpio2 22 GPIO_ACTIVE_LOW>;
+		reset-switch-gpios = <&gpio2 25 GPIO_ACTIVE_LOW>;
 	};
     spidev@1 {
 	     compatible = "rohm,dh2228fv";
@@ -436,130 +468,143 @@
 
 };
 
+
 &spi1 {
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&spi1_pins>;
     spidev@0 {
-	     compatible = "rohm,dh2228fv";
-         spi-max-frequency = <20000000>;
-         reg = <0>;
-	};
-    spidev@1 {
-			 compatible = "vitesse,vsc7385";
-			 spi-max-frequency = <20000000>;
-			 reg = <1>;
-			 ethernet-ports {
-				#address-cells = <1>;
-				#size-cells = <0>;
-				port@0 {
-					reg = <0>;
-					label = "cpu";
-					status = "okay";
-					ethernet = <&mac_sw>;
-					phy-mode = "rgmii";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
-				};
+            compatible = "mscc,vsc7512";
+            spi-max-frequency = <2500000>;
+            reg = <0>;
+            #address-cells = <1>;
+            #size-cells = <1>;
 
-				port@1 {
-					reg = <1>;
-					label = "swp0";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
-				};
+            mdio@7107009c {
+                compatible = "mscc,ocelot-miim";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x7107009c 0x24>;
 
-				port@2 {
-					reg = <2>;
-					label = "swp1";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
-				};
+                sw_phy0: ethernet-phy@0 {
+                    reg = <0x0>;
+                };
+            };
 
-				port@3 {
-					reg = <3>;
-					label = "swp2";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
-				};
+            mdio@710700c0 {
+                compatible = "mscc,ocelot-miim";
+                pinctrl-names = "default";
+                pinctrl-0 = <&miim1_pins>;
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0x710700c0 0x24>;
 
-				port@4 {
-					reg = <4>;
-					label = "swp3";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
-				};
+                sw_phy4: ethernet-phy@4 {
+                    reg = <0x4>;
+                };
+            };
 
-				port@5 {
-					reg = <5>;
-					label = "swp4";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
-				};
+            gpio: pinctrl@71070034 {
+                compatible = "mscc,ocelot-pinctrl";
+                gpio-controller;
+                #gpio-cells = <2>;
+                gpio-ranges = <&gpio 0 0 22>;
+                reg = <0x71070034 0x6c>;
 
-				port@6 {
-					reg = <6>;
-					label = "swp5";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
-				};
+                sgpio_pins: sgpio-pins {
+                    pins = "GPIO_0", "GPIO_1", "GPIO_2", "GPIO_3";
+                    function = "sg0";
+                };
 
-				port@7 {
-					reg = <7>;
-					label = "swp6";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
+                miim1_pins: miim1-pins {
+                    pins = "GPIO_14", "GPIO_15";
+                    function = "miim";
+                };
+            };
+
+            gpio@710700f8 {
+                compatible = "mscc,ocelot-sgpio";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                bus-frequency = <12500000>;
+                clocks = <&ocelot_clock>;
+                microchip,sgpio-port-ranges = <0 15>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&sgpio_pins>;
+                reg = <0x710700f8 0x100>;
+
+                sgpio_in0: gpio@0 {
+                    compatible = "microchip,sparx5-sgpio-bank";
+                    reg = <0>;
+                    gpio-controller;
+                    #gpio-cells = <3>;
+                    ngpios = <64>;
+                };
+
+                sgpio_out1: gpio@1 {
+                    compatible = "microchip,sparx5-sgpio-bank";
+                    reg = <1>;
+                    gpio-controller;
+                    #gpio-cells = <3>;
+                    ngpios = <64>;
+                };
+            };
+			ethernet-switch@0 {
+				compatible = "mscc,vsc7512-switch";
+				reg = <0x71010000 0x10000>,
+						<0x71030000 0x10000>,
+						<0x71080000 0x100>,
+						<0x710e0000 0x10000>,
+						<0x711e0000 0x100>,
+						<0x711f0000 0x100>,
+						<0x71200000 0x100>,
+						<0x71210000 0x100>,
+						<0x71220000 0x100>,
+						<0x71230000 0x100>,
+						<0x71240000 0x100>,
+						<0x71250000 0x100>,
+						<0x71260000 0x100>,
+						<0x71270000 0x100>,
+						<0x71280000 0x100>,
+						<0x71800000 0x80000>,
+						<0x71880000 0x10000>,
+						<0x71040000 0x10000>,
+						<0x71050000 0x10000>,
+						<0x71060000 0x10000>;
+						reg-names = "sys", "rew", "qs", "ptp", "port0", "port1",
+						"port2", "port3", "port4", "port5", "port6",
+						"port7", "port8", "port9", "port10", "qsys",
+						"ana", "s0", "s1", "s2";
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					port@0 {
+						reg = <0>;
+						label = "cpu";
+						status = "okay";
+						ethernet = <&mac_sw>;
+						phy-handle = <&sw_phy0>;
+						phy-mode = "internal";
+					};
+					port@1 {
+						reg = <1>;
+						label = "swp1";
+						phy-mode = "internal";
+						fixed-link {
 						speed = <1000>;
 						full-duplex;
 						pause;
-					};
-				};
-				port@8 {
-					reg = <8>;
-					label = "swp7";
-					status = "okay";
-					phy-mode = "internal";
-					fixed-link {
-						speed = <1000>;
-						full-duplex;
-						pause;
-					};
+							
+						};
+					};	
 				};
 			};
+	};
+    spidev@1 {
+			 compatible = "rohm,dh2228fv";
+			 spi-max-frequency = <20000000>;
+			 reg = <1>;
+
 
 	
 	};

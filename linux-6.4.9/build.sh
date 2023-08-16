@@ -5,9 +5,9 @@ cross_compile_path=/home/hf/linux/shifei/arm-gnu-toolchain-12.2.rel1-x86_64-arm-
 cross_compile_prefix=arm-none-linux-gnueabihf-
 defconfig=xts30_defconfig
 dtb=am335x-xts30.dtb
-core=-j6
+core=-j4
 load_addr=0x80008000
-
+tftp_dir=/home/hf/linux/shifei/tftp/
 echo "action:"
 echo "1: make xxx menuconfig"
 echo "2: make xxx defconfig(xts30_defconfig)"
@@ -37,19 +37,19 @@ then
 elif [ $action_num -eq 4 ]
 then
 	echo "CMD: make  ARCH=$cpu_arch CROSS_COMPILE=$cross_compile_prefix  uImage $core LOADADDR=$load_addr"
-	make  ARCH=$cpu_arch CROSS_COMPILE=$cross_compile_prefix  uImage $core LOADADDR=$load_addr all
+	make  ARCH=$cpu_arch CROSS_COMPILE=$cross_compile_prefix  uImage $core LOADADDR=$load_addr #all
 elif [ $action_num -eq 5 ]
 then
 	echo "CMD: make ARCH=$cpu_arch CROSS_COMPILE=$cross_compile_prefix $dtb"
 	make ARCH=$cpu_arch CROSS_COMPILE=$cross_compile_prefix $dtb
 elif [ $action_num -eq 6 ]
 then
-	echo "CMD: arch/arm/boot/uImage loadFile/"
-	cp arch/arm/boot/uImage loadFile/
+	echo "CMD: arch/arm/boot/uImage ${tftp_dir}"
+	cp arch/arm/boot/uImage ${tftp_dir}
 elif [ $action_num -eq 7 ]
 then
-	echo "CMD: arch/arm/boot/dts/am335x-xts30.dtb loadFile/"
-	cp arch/arm/boot/dts/am335x-xts30.dtb loadFile/
+	echo "CMD: arch/arm/boot/dts/am335x-xts30.dtb ${tftp_dir}"
+	cp arch/arm/boot/dts/am335x-xts30.dtb ${tftp_dir}
 elif [ $action_num -eq 8 ]
 then
 	echo "CMD: arch/arm/boot/uImage /home/hf/linux/shifei/tftp"
