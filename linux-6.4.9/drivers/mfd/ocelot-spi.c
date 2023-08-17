@@ -204,11 +204,11 @@ static int ocelot_spi_probe(struct spi_device *spi)
 	struct ocelot_ddata *ddata;
 	struct regmap *r;
 	int err;
-
+	
 	ddata = devm_kzalloc(dev, sizeof(*ddata), GFP_KERNEL);
 	if (!ddata)
 		return -ENOMEM;
-
+	
 	spi_set_drvdata(spi, ddata);
 
 	if (spi->max_speed_hz <= 500000) {
@@ -220,13 +220,13 @@ static int ocelot_spi_probe(struct spi_device *spi)
 		 * out enough padding bytes between the read request and data
 		 * transmission that lasts at least 1 microsecond.
 		 */
+		
 		ddata->spi_padding_bytes = 1 + (spi->max_speed_hz / HZ_PER_MHZ + 2) / 8;
-
 		ddata->dummy_buf = devm_kzalloc(dev, ddata->spi_padding_bytes, GFP_KERNEL);
 		if (!ddata->dummy_buf)
 			return -ENOMEM;
 	}
-
+	
 	spi->bits_per_word = 8;
 
 	err = spi_setup(spi);
@@ -250,6 +250,7 @@ static int ocelot_spi_probe(struct spi_device *spi)
 	 * This must be done before calling init, and after a chip reset is
 	 * performed.
 	 */
+#if 0
 	err = ocelot_spi_initialize(dev);
 	if (err)
 		return dev_err_probe(dev, err, "Error initializing SPI bus\n");
@@ -257,11 +258,12 @@ static int ocelot_spi_probe(struct spi_device *spi)
 	err = ocelot_chip_reset(dev);
 	if (err)
 		return dev_err_probe(dev, err, "Error resetting device\n");
-
+#endif
 	/*
 	 * A chip reset will clear the SPI configuration, so it needs to be done
 	 * again before we can access any registers.
 	 */
+
 	err = ocelot_spi_initialize(dev);
 	if (err)
 		return dev_err_probe(dev, err, "Error initializing SPI bus after reset\n");
